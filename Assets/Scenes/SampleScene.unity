@@ -412,7 +412,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 0.21960786, g: 0.21960786, b: 0.21960786, a: 0.392}
+  m_Color: {r: 0, g: 0, b: 0, a: 0}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -471,8 +471,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 5.3886, y: 1.3471}
-  m_SizeDelta: {x: 1536.3098, y: 235.8979}
+  m_AnchoredPosition: {x: 3.4015, y: -4.6376}
+  m_SizeDelta: {x: 1823.1128, y: 286.3248}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &872497639
 MonoBehaviour:
@@ -875,8 +875,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: 0, y: 205}
-  m_SizeDelta: {x: -299.9172, y: 287.775}
+  m_AnchoredPosition: {x: 0.0005493164, y: 174.44}
+  m_SizeDelta: {x: -0.00085449, y: 348.89}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1658818071
 MonoBehaviour:
@@ -1105,8 +1105,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -427, y: 0}
-  m_SizeDelta: {x: 420.1106, y: 674.4844}
+  m_AnchoredPosition: {x: -458, y: -37.629}
+  m_SizeDelta: {x: 625.8149, y: 1004.7413}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1904934336
 MonoBehaviour:
@@ -1128,9 +1128,9 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: -1211381164595184899, guid: e94b25aff2860ad4c8aaf8787fe6cc87, type: 3}
   m_Type: 0
-  m_PreserveAspect: 0
+  m_PreserveAspect: 1
   m_FillCenter: 1
   m_FillMethod: 4
   m_FillAmount: 1
@@ -1180,7 +1180,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -495.7276, y: 177.56061}
+  m_AnchoredPosition: {x: 5.3886, y: 213}
   m_SizeDelta: {x: 534.0774, y: 60.7767}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1960934660
@@ -1237,8 +1237,8 @@ MonoBehaviour:
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0
-  m_HorizontalAlignment: 1
-  m_VerticalAlignment: 256
+  m_HorizontalAlignment: 2
+  m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
   m_characterHorizontalScale: 1

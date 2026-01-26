@@ -1,0 +1,40 @@
+{
+  "endings": [
+    {
+      "id": "scholar",
+      "name": "학자 엔딩",
+      "conditions": {
+        "intelligence": 80
+      },
+      "priority": 1,
+      "description": "뛰어난 학업 성적으로 명문대에 진학했습니다!"
+    },
+    {
+      "id": "idol",
+      "name": "아이돌 엔딩",
+      "conditions": {
+        "charm": 80,
+        "courage": 50
+      },
+      "priority": 2,
+      "description": "압도적인 매력으로 연예계에 데뷔했습니다!"
+    },
+    {
+      "id": "athlete",
+      "name": "운동선수 엔딩",
+      "conditions": {
+        "courage": 80,
+        "charm": 40
+      },
+      "priority": 3,
+      "description": "강인한 정신력으로 프로 선수가 되었습니다!"
+    },
+    {
+      "id": "balanced",
+      "name": "평범한 엔딩",
+      "conditions": {},
+      "priority": 99,
+      "description": "평범하지만 행복한 일상을 보내고 있습니다."
+    }
+  ]
+}

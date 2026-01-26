@@ -1,0 +1,110 @@
+{
+  "locations": [
+    {
+      "id": "school",
+      "name": "학교 도서관",
+      "availableTime": ["afternoon"],
+      "activities": [
+        {
+          "id": "study",
+          "name": "공부하기",
+          "statChanges": {
+            "intelligence": 3,
+            "charm": 0,
+            "courage": 0,
+            "fatigue": 10,
+            "money": 0
+          },
+          "cost": 0,
+          "description": "집중해서 공부합니다."
+        },
+        {
+          "id": "club",
+          "name": "동아리 활동",
+          "statChanges": {
+            "intelligence": 0,
+            "charm": 2,
+            "courage": 1,
+            "fatigue": 5,
+            "money": 0
+          },
+          "cost": 0,
+          "description": "친구들과 즐거운 시간을 보냅니다."
+        }
+      ]
+    },
+    {
+      "id": "mall",
+      "name": "폴로니안 몰",
+      "availableTime": ["afternoon", "night"],
+      "activities": [
+        {
+          "id": "parttime",
+          "name": "아르바이트",
+          "statChanges": {
+            "intelligence": 0,
+            "charm": 1,
+            "courage": 0,
+            "fatigue": 15,
+            "money": 1500
+          },
+          "cost": 0,
+          "description": "카페에서 아르바이트를 합니다."
+        },
+        {
+          "id": "shopping",
+          "name": "쇼핑",
+          "statChanges": {
+            "intelligence": 0,
+            "charm": 3,
+            "courage": 0,
+            "fatigue": 5,
+            "money": 0
+          },
+          "cost": 1000,
+          "description": "멋진 옷을 구경합니다."
+        }
+      ]
+    },
+    {
+      "id": "gym",
+      "name": "체육관",
+      "availableTime": ["afternoon", "night"],
+      "activities": [
+        {
+          "id": "workout",
+          "name": "운동하기",
+          "statChanges": {
+            "intelligence": 0,
+            "charm": 0,
+            "courage": 3,
+            "fatigue": 20,
+            "money": 0
+          },
+          "cost": 500,
+          "description": "땀 흘리며 운동합니다."
+        }
+      ]
+    },
+    {
+      "id": "dorm",
+      "name": "기숙사",
+      "availableTime": ["night"],
+      "activities": [
+        {
+          "id": "sleep",
+          "name": "푹 쉬기",
+          "statChanges": {
+            "intelligence": 0,
+            "charm": 0,
+            "courage": 0,
+            "fatigue": -30,
+            "money": 0
+          },
+          "cost": 0,
+          "description": "편안하게 잠을 잡니다."
+        }
+      ]
+    }
+  ]
+}
