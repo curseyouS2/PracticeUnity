@@ -6,10 +6,11 @@ using UnityEngine;
 public class GameState
 {
     public int currentDay = 1;
-    public string currentTimeSlot = "afternoon"; // "afternoon" or "night"
+    public string currentTime = "4:00"; 
     public int maxDays = 30;
     public Stats stats = new Stats();
-    public Conditions conditions = new Conditions();
+    public Health health = new Health();
+    public ConditionType condition = ConditionType.None;
 }
 
 [System.Serializable]
@@ -18,14 +19,27 @@ public class Stats
     public int intelligence = 10;
     public int charm = 10;
     public int courage = 10;
-    public int fatigue = 0;
+    public int moral = 0;
     public int money = 5000;
 }
 
 [System.Serializable]
-public class Conditions
+public class Health
 {
-    public bool isExhausted = false;
+    public int physical = 100;
+    public int mental = 100;
+    public int fatigue = 0;
+}
+[System.Serializable]
+public enum ConditionType
+{
+    None,
+    Exhausted,
+    Sick,
+    Injured,
+    Happy,
+    Sad,
+    Depressed
 }
 
 [System.Serializable]
@@ -54,8 +68,11 @@ public class StatChanges
     public int intelligence;
     public int charm;
     public int courage;
-    public int fatigue;
     public int money;
+    public int fatigue;
+    public int moral;
+    public int physical;
+    public int mental;
 }
 
 [System.Serializable]
