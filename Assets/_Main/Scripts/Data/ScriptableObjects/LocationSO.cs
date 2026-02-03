@@ -41,38 +41,6 @@ public class LocationSO : ScriptableObject
     /// </summary>
     public string GetAvailableTimeText()
     {
-        return $"{MinutesToTimeString(openTimeMinutes)} ~ {MinutesToTimeString(closeTimeMinutes)}";
-    }
-
-    private string MinutesToTimeString(int minutes)
-    {
-        int hours = (minutes / 60) % 24;
-        int mins = minutes % 60;
-        return $"{hours:D2}:{mins:D2}";
-    }
-}
-
-/// <summary>
-/// 시간 유틸리티
-/// </summary>
-public static class TimeUtility
-{
-    public const int MINUTES_PER_DAY = 1440; // 24 * 60
-
-    public static int HoursToMinutes(int hours, int minutes = 0)
-    {
-        return hours * 60 + minutes;
-    }
-
-    public static string MinutesToTimeString(int totalMinutes)
-    {
-        int hours = (totalMinutes / 60) % 24;
-        int mins = totalMinutes % 60;
-        return $"{hours:D2}:{mins:D2}";
-    }
-
-    public static (int hours, int minutes) MinutesToTime(int totalMinutes)
-    {
-        return ((totalMinutes / 60) % 24, totalMinutes % 60);
+        return $"{TimeUtility.MinutesToTimeString(openTimeMinutes)} ~ {TimeUtility.MinutesToTimeString(closeTimeMinutes)}";
     }
 }
