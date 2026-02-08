@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9f15ed3b6c2e4d24d9ee5b02ccbae3a8, type: 3}
+  m_Name: Home
+  m_EditorClassIdentifier: Assembly-CSharp::LocationSO
+  id: home
+  locationName: "\uC9D1"
+  description: 
+  openTimeMinutes: 540
+  closeTimeMinutes: 1260
+  activities:
+  - {fileID: 11400000, guid: d3472daf96372534898cda72fadbea9a, type: 2}
+  - {fileID: 11400000, guid: 477dc7bcc3a32714d9e03ab0d2338c44, type: 2}
+  connectedLocations:
+  - {fileID: 11400000, guid: bc8609cd1f4a5984da57db0edcd224ea, type: 2}
+  locationIcon: {fileID: 0}
+  backgroundImage: {fileID: 0}

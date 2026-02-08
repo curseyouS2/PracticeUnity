@@ -149,6 +149,7 @@ GameObject:
   - component: {fileID: 6654064025811296378}
   - component: {fileID: 6182512178281361686}
   - component: {fileID: 4510083965858532640}
+  - component: {fileID: 3530584221268873914}
   m_Layer: 5
   m_Name: LocationButton
   m_TagString: Untagged
@@ -258,3 +259,15 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &3530584221268873914
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5152873260533657834}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 48db12aab28ebce458861e8a0ec1ecf2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SelectButton
