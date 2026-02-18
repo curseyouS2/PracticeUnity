@@ -126,31 +126,70 @@ public class StatusManager : MonoBehaviour
     }
 
     /// <summary>
+    /// 스탯 비용 차감 (양수 입력값을 음수로 변환하여 적용, efficiency 미적용)
+    /// </summary>
+    public void ApplyStatCost(StatChanges cost)
+    {
+        if (cost == null) return;
+
+        var negated = new StatChanges
+        {
+            intelligence = -cost.intelligence,
+            charm = -cost.charm,
+            courage = -cost.courage,
+            moral = -cost.moral,
+            money = -cost.money,
+            fatigue = -cost.fatigue,
+            physical = -cost.physical,
+            mental = -cost.mental
+        };
+
+        Status.ApplyChanges(negated);
+        Health.ApplyChanges(negated);
+    }
+
+    /// <summary>
     /// 활동 실행 가능 여부 확인
     /// </summary>
     public bool CanExecuteActivity(ActivitySO activity)
     {
-        // 컨디션 체크
         if (!Condition.CanPerformActivity(activity))
-        {
             return false;
+
+        // 비용 체크 (money)
+        if (activity.statCost != null && activity.statCost.money > 0)
+        {
+            if (!Status.CanAfford(activity.statCost.money))
+                return false;
         }
 
-        // 비용 체크
-        if (!Status.CanAfford(activity.cost))
+        // 스탯 조건 체크
+        if (activity.statConditions != null)
         {
-            return false;
-        }
-
-        // 요구 스탯 체크
-        if (activity.requirements != null)
-        {
-            foreach (var req in activity.requirements)
+            foreach (var req in activity.statConditions)
             {
                 if (!MeetsRequirement(req))
-                {
                     return false;
-                }
+            }
+        }
+
+        // 아이템 조건 체크
+        if (activity.itemConditions != null)
+        {
+            foreach (var req in activity.itemConditions)
+            {
+                if (!Inventory.HasItem(req.item, req.amount))
+                    return false;
+            }
+        }
+
+        // 아이템 비용 보유 체크
+        if (activity.itemCost != null)
+        {
+            foreach (var req in activity.itemCost)
+            {
+                if (!Inventory.HasItem(req.item, req.amount))
+                    return false;
             }
         }
 
@@ -163,23 +202,38 @@ public class StatusManager : MonoBehaviour
     public string GetActivityBlockReason(ActivitySO activity)
     {
         if (!Condition.CanPerformActivity(activity))
-        {
             return "현재 상태로는 이 활동을 할 수 없습니다.";
+
+        if (activity.statCost != null && activity.statCost.money > 0)
+        {
+            if (!Status.CanAfford(activity.statCost.money))
+                return "소지금이 부족합니다.";
         }
 
-        if (!Status.CanAfford(activity.cost))
+        if (activity.statConditions != null)
         {
-            return "소지금이 부족합니다.";
-        }
-
-        if (activity.requirements != null)
-        {
-            foreach (var req in activity.requirements)
+            foreach (var req in activity.statConditions)
             {
                 if (!MeetsRequirement(req))
-                {
                     return $"{req.statType} 스탯이 부족합니다. (필요: {req.minValue})";
-                }
+            }
+        }
+
+        if (activity.itemConditions != null)
+        {
+            foreach (var req in activity.itemConditions)
+            {
+                if (!Inventory.HasItem(req.item, req.amount))
+                    return $"아이템 '{req.item?.itemName}'이(가) 부족합니다. (필요: {req.amount})";
+            }
+        }
+
+        if (activity.itemCost != null)
+        {
+            foreach (var req in activity.itemCost)
+            {
+                if (!Inventory.HasItem(req.item, req.amount))
+                    return $"아이템 '{req.item?.itemName}'이(가) 부족합니다. (필요: {req.amount})";
             }
         }
 

@@ -24,7 +24,15 @@ public class LocationSO : ScriptableObject
 
     [Header("Visuals")]
     public Sprite locationIcon;
-    public Sprite backgroundImage;
+    public Sprite backgroundSprite;
+
+    [Header("Entry Script")]
+    [Tooltip("이동 시 로그에 출력되는 텍스트 (랜덤 1개 출력)")]
+    public string[] entryScript;
+
+    [Header("Entry Conditions")]
+    public List<StatRequirement> entryConditions;
+    public List<ItemRequirement> entryItemConditions;
 
     /// <summary>
     /// 특정 시간에 이용 가능한지 확인

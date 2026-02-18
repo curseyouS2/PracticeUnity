@@ -31,7 +31,7 @@ public class ActivityService
             return (false, reason);
         }
 
-        // 2. 스탯/비용/컨디션 검증
+        // 2. 스탯/비용/컨디션/아이템 검증
         if (!statusManager.CanExecuteActivity(activity))
         {
             string reason = statusManager.GetActivityBlockReason(activity);
@@ -41,17 +41,36 @@ public class ActivityService
         // 3. 효율 계산 (효과 적용 전)
         float efficiency = statusManager.CalculateTotalEfficiency();
 
-        // 4. 비용 지불
-        if (activity.cost > 0)
-            statusManager.Status.SpendMoney(activity.cost);
+        // 4. 비용 지불 (스탯)
+        statusManager.ApplyStatCost(activity.statCost);
 
-        // 5. 효과 적용
-        statusManager.ApplyActivityEffect(activity.statChanges);
+        // 5. 아이템 비용 소비
+        if (activity.itemCost != null)
+        {
+            foreach (var cost in activity.itemCost)
+            {
+                if (cost.item != null)
+                    statusManager.Inventory.RemoveItem(cost.item, cost.amount);
+            }
+        }
 
-        // 6. 시간 진행
+        // 6. 보상 적용 (스탯)
+        statusManager.ApplyActivityEffect(activity.statReward);
+
+        // 7. 아이템 보상 지급
+        if (activity.itemReward != null)
+        {
+            foreach (var reward in activity.itemReward)
+            {
+                if (reward.item != null)
+                    statusManager.Inventory.AddItem(reward.item, reward.amount);
+            }
+        }
+
+        // 8. 시간 진행
         routineManager.AdvanceTime(activity.durationMinutes);
 
-        // 7. 이벤트 발생
+        // 9. 이벤트 발생
         OnActivityExecuted?.Invoke(activity, efficiency);
 
         return (true, null);

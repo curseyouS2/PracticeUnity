@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 
 /// <summary>
-/// 중앙 패널 - 단일 컨테이너에 활동 → 캐릭터 → 장소 순으로 버튼 표시
+/// 중앙 패널 - 기본: 활동 + 캐릭터 + 이동 버튼 / 이동 모드: 장소 목록 + 뒤로 버튼
 /// </summary>
 public class MainPanel : MonoBehaviour
 {
@@ -28,6 +28,8 @@ public class MainPanel : MonoBehaviour
     [SerializeField] private Color unavailableColor = Color.gray;
 
     private LocationSO currentLocation;
+    private bool isInMoveMode;
+    private Stack<LocationSO> locationHistory = new Stack<LocationSO>();
 
     private void OnEnable()
     {
@@ -52,7 +54,20 @@ public class MainPanel : MonoBehaviour
 
     private void HandleLocationClicked(LocationSO location)
     {
+        // 이동 히스토리에 현재 장소 저장
+        if (currentLocation != null)
+            locationHistory.Push(currentLocation);
+
         LocationManager.Instance?.SetLocation(location);
+        isInMoveMode = false;
+
+        // entryScript 출력
+        if (location.entryScript != null && location.entryScript.Length > 0)
+        {
+            string script = location.entryScript[UnityEngine.Random.Range(0, location.entryScript.Length)];
+            ShowMessage(script);
+        }
+
         DisplayCurrentLocation();
     }
 
@@ -66,12 +81,30 @@ public class MainPanel : MonoBehaviour
         OnCharacterTalkSelected?.Invoke(character);
     }
 
+    private void HandleMoveButtonClicked()
+    {
+        isInMoveMode = true;
+        ShowMoveScreen();
+    }
+
+    private void HandleBackClicked()
+    {
+        if (locationHistory.Count > 0)
+        {
+            var previousLocation = locationHistory.Pop();
+            LocationManager.Instance?.SetLocation(previousLocation);
+        }
+
+        isInMoveMode = false;
+        DisplayCurrentLocation();
+    }
+
     #endregion
 
     #region Display
 
     /// <summary>
-    /// 현재 장소 기반으로 활동 → 캐릭터 → 이동 가능 장소 순으로 표시
+    /// 현재 장소 기반으로 활동 → 캐릭터 → 이동 버튼 표시
     /// </summary>
     public void DisplayCurrentLocation()
     {
@@ -80,6 +113,7 @@ public class MainPanel : MonoBehaviour
         currentLocation = LocationManager.Instance.NowLocation;
         if (currentLocation == null) return;
 
+        isInMoveMode = false;
         ClearContainer();
 
         // 1. 활동
@@ -97,8 +131,21 @@ public class MainPanel : MonoBehaviour
                 CreateCharacterButton(character);
         }
 
-        // 3. 이동 가능 장소
-        if (currentLocation.connectedLocations != null)
+        // 3. 이동 버튼 (connectedLocations가 있을 때만)
+        if (currentLocation.connectedLocations != null && currentLocation.connectedLocations.Count > 0)
+        {
+            CreateMoveButton();
+        }
+    }
+
+    /// <summary>
+    /// 이동 모드 화면 - connectedLocations 버튼 + 뒤로 버튼
+    /// </summary>
+    private void ShowMoveScreen()
+    {
+        ClearContainer();
+
+        if (currentLocation?.connectedLocations != null)
         {
             int currentTime = RoutineManager.Instance != null ? RoutineManager.Instance.CurrentTimeMinutes : 0;
             foreach (var loc in currentLocation.connectedLocations)
@@ -107,6 +154,9 @@ public class MainPanel : MonoBehaviour
                     CreateLocationButton(loc);
             }
         }
+
+        // 뒤로 버튼
+        CreateBackButton();
     }
 
     /// <summary>
@@ -196,6 +246,38 @@ public class MainPanel : MonoBehaviour
             btn.interactable = canTalk;
     }
 
+    private void CreateMoveButton()
+    {
+        GameObject btnObj = Instantiate(buttonPrefab, buttonContainer);
+
+        TextMeshProUGUI btnText = btnObj.GetComponentInChildren<TextMeshProUGUI>();
+        if (btnText != null)
+            btnText.text = "<color=#88aaff>▶ 이동</color>";
+
+        Button btn = btnObj.GetComponent<Button>();
+        if (btn != null)
+        {
+            btn.onClick.RemoveAllListeners();
+            btn.onClick.AddListener(HandleMoveButtonClicked);
+        }
+    }
+
+    private void CreateBackButton()
+    {
+        GameObject btnObj = Instantiate(buttonPrefab, buttonContainer);
+
+        TextMeshProUGUI btnText = btnObj.GetComponentInChildren<TextMeshProUGUI>();
+        if (btnText != null)
+            btnText.text = "<color=#aaaaaa>◀ 뒤로</color>";
+
+        Button btn = btnObj.GetComponent<Button>();
+        if (btn != null)
+        {
+            btn.onClick.RemoveAllListeners();
+            btn.onClick.AddListener(HandleBackClicked);
+        }
+    }
+
     #endregion
 
     #region Messages
@@ -204,15 +286,31 @@ public class MainPanel : MonoBehaviour
     {
         string result = $"<b>[{activity.activityName}]</b> 완료!\n";
 
-        if (!string.IsNullOrEmpty(activity.description))
+        // activityScript 랜덤 출력
+        if (activity.activityScript != null && activity.activityScript.Length > 0)
+        {
+            string script = activity.activityScript[UnityEngine.Random.Range(0, activity.activityScript.Length)];
+            result += script + "\n";
+        }
+        else if (!string.IsNullOrEmpty(activity.description))
+        {
             result += activity.description + "\n";
+        }
 
         if (efficiency < 1.0f)
             result += $"<color=yellow>(효율 {efficiency * 100:F0}%)</color>\n";
 
-        result += GetStatChangeText(activity.statChanges);
-        ShowMessage(result);
+        // 비용 표시
+        string costText = GetStatChangeText(activity.statCost);
+        if (!string.IsNullOrEmpty(costText))
+            result += $"<color=#ff8888>소비: {costText}</color>\n";
 
+        // 보상 표시
+        string rewardText = GetStatChangeText(activity.statReward);
+        if (!string.IsNullOrEmpty(rewardText))
+            result += $"<color=#88ff88>획득: {rewardText}</color>\n";
+
+        ShowMessage(result);
         DisplayCurrentLocation();
     }
 
@@ -270,8 +368,8 @@ public class MainPanel : MonoBehaviour
         List<string> info = new List<string>();
         if (activity.durationMinutes > 0)
             info.Add(FormatDuration(activity.durationMinutes));
-        if (activity.cost > 0)
-            info.Add($"{activity.cost:N0}원");
+        if (activity.statCost != null && activity.statCost.money > 0)
+            info.Add($"{activity.statCost.money:N0}원");
 
         if (info.Count > 0)
             label += $"\n<size=80%><color=#888888>{string.Join(" | ", info)}</color></size>";
@@ -330,12 +428,15 @@ public class MainPanel : MonoBehaviour
 
         tooltip += $"<color=#888888>소요 시간: {FormatDuration(activity.durationMinutes)}</color>\n";
 
-        string statChanges = GetStatChangeText(activity.statChanges);
-        if (!string.IsNullOrEmpty(statChanges))
-            tooltip += $"<color=#88ff88>{statChanges}</color>\n";
+        // 비용 표시
+        string costText = GetStatChangeText(activity.statCost);
+        if (!string.IsNullOrEmpty(costText))
+            tooltip += $"<color=#ff8888>소비: {costText}</color>\n";
 
-        if (activity.cost > 0)
-            tooltip += $"<color=#ffff88>비용: {activity.cost:N0}원</color>\n";
+        // 보상 표시
+        string rewardText = GetStatChangeText(activity.statReward);
+        if (!string.IsNullOrEmpty(rewardText))
+            tooltip += $"<color=#88ff88>획득: {rewardText}</color>\n";
 
         if (!canExecute)
         {

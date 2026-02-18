@@ -6,7 +6,7 @@ using UnityEngine;
 public class GameState
 {
     public int currentDay = 1;
-    public int currentTime = 960; 
+    public int currentTime = 360;
     public int maxDays = 30;
     public string currentLocationId = "home";
     public Stats stats = new Stats();

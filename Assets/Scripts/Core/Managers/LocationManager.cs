@@ -114,6 +114,66 @@ public class LocationManager : MonoBehaviour
         return nowLocation != null ? nowLocation.locationName : "???";
     }
 
+    /// <summary>
+    /// 장소 입장 조건 충족 여부 확인
+    /// </summary>
+    public bool CanEnterLocation(LocationSO location)
+    {
+        if (location == null) return false;
+        if (StatusManager.Instance == null) return true;
+
+        // 스탯 조건 체크
+        if (location.entryConditions != null)
+        {
+            foreach (var req in location.entryConditions)
+            {
+                if (StatusManager.Instance.GetStatValue(req.statType) < req.minValue)
+                    return false;
+            }
+        }
+
+        // 아이템 조건 체크
+        if (location.entryItemConditions != null)
+        {
+            foreach (var req in location.entryItemConditions)
+            {
+                if (!StatusManager.Instance.Inventory.HasItem(req.item, req.amount))
+                    return false;
+            }
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// 장소 입장 불가 사유 반환
+    /// </summary>
+    public string GetEntryBlockReason(LocationSO location)
+    {
+        if (location == null) return "장소 정보가 없습니다.";
+        if (StatusManager.Instance == null) return null;
+
+        if (location.entryConditions != null)
+        {
+            foreach (var req in location.entryConditions)
+            {
+                if (StatusManager.Instance.GetStatValue(req.statType) < req.minValue)
+                    return $"{req.statType} 스탯이 부족합니다. (필요: {req.minValue})";
+            }
+        }
+
+        if (location.entryItemConditions != null)
+        {
+            foreach (var req in location.entryItemConditions)
+            {
+                if (!StatusManager.Instance.Inventory.HasItem(req.item, req.amount))
+                    return $"아이템 '{req.item?.itemName}'이(가) 부족합니다. (필요: {req.amount})";
+            }
+        }
+
+        return null;
+    }
+
 #if UNITY_EDITOR
     public void SetLocations(List<LocationSO> newLocations)
     {

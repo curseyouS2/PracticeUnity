@@ -13,7 +13,7 @@ public class RoutineManager : MonoBehaviour
     public event Action<int> OnDayEndProcessing;
 
     [Header("Time Settings")]
-    [SerializeField] private int startTimeMinutes = 960;      // 16:00 (방과후)
+    [SerializeField] private int startTimeMinutes = 360;      // 06:00 (기상)
     [SerializeField] private int sleepTimeMinutes = 1440;     // 24:00 (자정)
     [SerializeField] private int maxDays = 30;
 
