@@ -70,12 +70,12 @@ public class ConditionController
         }
     }
 
-    public bool CanPerformActivity(ActivitySO activity)
+    public bool CanPerformActivity(DataTable.ActivityTable activity)
     {
         // 탈진 상태면 휴식만 가능
         if (currentCondition == ConditionType.Exhausted)
         {
-            return activity.id == "sleep" || activity.id == "rest";
+            return activity.id == "act_sleep" || activity.id == "act_rest";
         }
 
         // 부상 상태면 격렬한 활동 불가 (activity에 태그 추가 필요)

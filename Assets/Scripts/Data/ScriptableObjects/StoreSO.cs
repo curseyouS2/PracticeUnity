@@ -11,6 +11,6 @@ public class StoreSO : LocationSO
 [System.Serializable]
 public class ShopItemEntry
 {
-    public ItemSO item;
+    public string itemId;
     public int price;
 }

@@ -40,17 +40,18 @@ public class StatRequirement
 [System.Serializable]
 public class ItemRequirement
 {
-    public ItemSO item;
+    public string itemId;
     public int amount = 1;
 }
 
 [System.Serializable]
 public class ItemReward
 {
-    public ItemSO item;
+    public string itemId;
     public int amount = 1;
 }
 
+[GoogleSheet.Core.Type.UGS(typeof(StatType))]
 public enum StatType
 {
     Intelligence,

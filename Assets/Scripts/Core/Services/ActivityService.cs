@@ -8,7 +8,7 @@ using System.Collections.Generic;
 /// </summary>
 public class ActivityService
 {
-    public event Action<ActivitySO, float> OnActivityExecuted;
+    public event Action<DataTable.ActivityTable, float> OnActivityExecuted;
 
     private readonly StatusManager statusManager;
     private readonly RoutineManager routineManager;
@@ -22,7 +22,7 @@ public class ActivityService
     /// <summary>
     /// 활동 실행. 성공 여부와 실패 사유를 반환
     /// </summary>
-    public (bool success, string message) ExecuteActivity(LocationSO location, ActivitySO activity)
+    public (bool success, string message) ExecuteActivity(DataTable.LocationTable location, DataTable.ActivityTable activity)
     {
         // 1. 시간 검증
         if (activity.durationMinutes > routineManager.Time.GetRemainingMinutes())
@@ -49,8 +49,9 @@ public class ActivityService
         {
             foreach (var cost in activity.itemCost)
             {
-                if (cost.item != null)
-                    statusManager.Inventory.RemoveItem(cost.item, cost.amount);
+                var item = statusManager.GetItemById(cost.itemId);
+                if (item != null)
+                    statusManager.Inventory.RemoveItem(item, cost.amount);
             }
         }
 
@@ -62,8 +63,9 @@ public class ActivityService
         {
             foreach (var reward in activity.itemReward)
             {
-                if (reward.item != null)
-                    statusManager.Inventory.AddItem(reward.item, reward.amount);
+                var item = statusManager.GetItemById(reward.itemId);
+                if (item != null)
+                    statusManager.Inventory.AddItem(item, reward.amount);
             }
         }
 
@@ -79,7 +81,7 @@ public class ActivityService
     /// <summary>
     /// 활동 실행 가능 여부
     /// </summary>
-    public bool CanExecuteActivity(ActivitySO activity)
+    public bool CanExecuteActivity(DataTable.ActivityTable activity)
     {
         if (activity.durationMinutes > routineManager.Time.GetRemainingMinutes())
             return false;
@@ -90,7 +92,7 @@ public class ActivityService
     /// <summary>
     /// 활동 불가 사유
     /// </summary>
-    public string GetActivityBlockReason(ActivitySO activity)
+    public string GetActivityBlockReason(DataTable.ActivityTable activity)
     {
         if (activity.durationMinutes > routineManager.Time.GetRemainingMinutes())
             return $"시간이 부족합니다. (필요: {activity.durationMinutes}분, 남은 시간: {routineManager.Time.GetRemainingMinutes()}분)";
@@ -105,13 +107,16 @@ public class ActivityService
     {
         if (locationManager != null)
         {
+            var actDict = DataTable.ActivityTable.GetDictionary();
             foreach (var location in locationManager.AllLocations)
             {
-                var restActivity = location.activities?.Find(a => a.id == "rest" || a.id == "sleep");
-                if (restActivity != null)
+                foreach (var actId in location.activities)
                 {
-                    ExecuteActivity(location, restActivity);
-                    return;
+                    if ((actId == "act_rest" || actId == "act_sleep") && actDict.TryGetValue(actId, out var restActivity))
+                    {
+                        ExecuteActivity(location, restActivity);
+                        return;
+                    }
                 }
             }
         }

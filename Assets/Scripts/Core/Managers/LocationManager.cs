@@ -9,12 +9,11 @@ public class LocationManager : MonoBehaviour
 {
     public static LocationManager Instance { get; private set; }
 
-    [Header("Location Data")]
-    [SerializeField] private LocationSO nowLocation;
-    [SerializeField] private List<LocationSO> locations;
+    private DataTable.LocationTable nowLocation;
+    private List<DataTable.LocationTable> locations;
 
-    public LocationSO NowLocation => nowLocation;
-    public List<LocationSO> AllLocations => locations;
+    public DataTable.LocationTable NowLocation => nowLocation;
+    public List<DataTable.LocationTable> AllLocations => locations;
 
     private void Awake()
     {
@@ -30,22 +29,16 @@ public class LocationManager : MonoBehaviour
 
     public void Initialize(string startLocationId = null)
     {
-        // 장소 데이터가 없으면 Resources에서 자동 로드
-        if (locations == null || locations.Count == 0)
-        {
-            locations = new List<LocationSO>(Resources.LoadAll<LocationSO>("Locations"));
-            Debug.Log($"[LocationManager] Resources에서 {locations.Count}개의 장소 자동 로드");
-        }
+        locations = DataTable.LocationTable.GetList();
+        Debug.Log($"[LocationManager] DataTable에서 {locations.Count}개의 장소 로드");
 
-        // 세이브 데이터에서 현재 위치 설정
         if (!string.IsNullOrEmpty(startLocationId))
         {
             SetLocation(startLocationId);
         }
         else if (nowLocation == null)
         {
-            // 기본값: "home" ID를 가진 장소 또는 첫 번째 장소
-            nowLocation = locations.Find(loc => loc.id == "home") ?? locations.FirstOrDefault();
+            nowLocation = locations.Find(loc => loc.id == "loc_home") ?? locations.FirstOrDefault();
             if (nowLocation != null)
                 Debug.Log($"[LocationManager] 기본 위치 설정: {nowLocation.locationName}");
         }
@@ -54,10 +47,10 @@ public class LocationManager : MonoBehaviour
     /// <summary>
     /// 특정 시간에 이용 가능한 장소 목록
     /// </summary>
-    public List<LocationSO> GetAvailableLocations(int currentTimeMinutes)
+    public List<DataTable.LocationTable> GetAvailableLocations(int currentTimeMinutes)
     {
         return locations
-            .Where(loc => loc.IsAvailableAt(currentTimeMinutes))
+            .Where(loc => IsAvailableAt(loc, currentTimeMinutes))
             .ToList();
     }
 
@@ -72,8 +65,8 @@ public class LocationManager : MonoBehaviour
             return false;
         }
 
-        var location = locations.Find(loc => loc.id == locationId);
-        if (location != null)
+        var dict = DataTable.LocationTable.GetDictionary();
+        if (dict.TryGetValue(locationId, out var location))
         {
             nowLocation = location;
             Debug.Log($"[LocationManager] 현재 위치 설정: {nowLocation.locationName} ({locationId})");
@@ -87,9 +80,9 @@ public class LocationManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 현재 위치 설정 (LocationSO로)
+    /// 현재 위치 설정 (LocationTable로)
     /// </summary>
-    public void SetLocation(LocationSO location)
+    public void SetLocation(DataTable.LocationTable location)
     {
         if (location != null)
         {
@@ -117,12 +110,11 @@ public class LocationManager : MonoBehaviour
     /// <summary>
     /// 장소 입장 조건 충족 여부 확인
     /// </summary>
-    public bool CanEnterLocation(LocationSO location)
+    public bool CanEnterLocation(DataTable.LocationTable location)
     {
         if (location == null) return false;
         if (StatusManager.Instance == null) return true;
 
-        // 스탯 조건 체크
         if (location.entryConditions != null)
         {
             foreach (var req in location.entryConditions)
@@ -132,12 +124,11 @@ public class LocationManager : MonoBehaviour
             }
         }
 
-        // 아이템 조건 체크
         if (location.entryItemConditions != null)
         {
             foreach (var req in location.entryItemConditions)
             {
-                if (!StatusManager.Instance.Inventory.HasItem(req.item, req.amount))
+                if (!StatusManager.Instance.Inventory.HasItem(StatusManager.Instance.GetItemById(req.itemId), req.amount))
                     return false;
             }
         }
@@ -148,7 +139,7 @@ public class LocationManager : MonoBehaviour
     /// <summary>
     /// 장소 입장 불가 사유 반환
     /// </summary>
-    public string GetEntryBlockReason(LocationSO location)
+    public string GetEntryBlockReason(DataTable.LocationTable location)
     {
         if (location == null) return "장소 정보가 없습니다.";
         if (StatusManager.Instance == null) return null;
@@ -166,18 +157,24 @@ public class LocationManager : MonoBehaviour
         {
             foreach (var req in location.entryItemConditions)
             {
-                if (!StatusManager.Instance.Inventory.HasItem(req.item, req.amount))
-                    return $"아이템 '{req.item?.itemName}'이(가) 부족합니다. (필요: {req.amount})";
+                var item = StatusManager.Instance.GetItemById(req.itemId);
+                if (!StatusManager.Instance.Inventory.HasItem(item, req.amount))
+                    return $"아이템 '{item?.itemName}'이(가) 부족합니다. (필요: {req.amount})";
             }
         }
 
         return null;
     }
 
-#if UNITY_EDITOR
-    public void SetLocations(List<LocationSO> newLocations)
+    public static bool IsAvailableAt(DataTable.LocationTable loc, int currentTimeMinutes)
     {
-        locations = newLocations;
+        if (loc.closeTimeMinutes < loc.openTimeMinutes)
+            return currentTimeMinutes >= loc.openTimeMinutes || currentTimeMinutes < loc.closeTimeMinutes;
+        return currentTimeMinutes >= loc.openTimeMinutes && currentTimeMinutes < loc.closeTimeMinutes;
     }
-#endif
+
+    public static string GetAvailableTimeText(DataTable.LocationTable loc)
+    {
+        return $"{TimeUtility.MinutesToTimeString(loc.openTimeMinutes)} ~ {TimeUtility.MinutesToTimeString(loc.closeTimeMinutes)}";
+    }
 }

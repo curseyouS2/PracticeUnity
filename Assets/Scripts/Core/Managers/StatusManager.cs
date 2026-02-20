@@ -19,6 +19,14 @@ public class StatusManager : MonoBehaviour
     public InventoryController Inventory { get; private set; }
     public RelationshipController Relationship { get; private set; }
 
+    private Dictionary<string, ItemSO> itemRegistry = new Dictionary<string, ItemSO>();
+
+    public ItemSO GetItemById(string id)
+    {
+        if (string.IsNullOrEmpty(id)) return null;
+        return itemRegistry.TryGetValue(id, out var item) ? item : null;
+    }
+
     private void Awake()
     {
         if (Instance == null)
@@ -97,16 +105,16 @@ public class StatusManager : MonoBehaviour
 
     private void LoadInventory(List<InventoryData> inventoryData)
     {
-        if (inventoryData == null || inventoryData.Count == 0) return;
+        // itemId 조회용 레지스트리 항상 빌드
+        itemRegistry.Clear();
+        foreach (var item in Resources.LoadAll<ItemSO>(""))
+            itemRegistry[item.id] = item;
 
-        var allItems = Resources.LoadAll<ItemSO>("");
-        var itemLookup = new Dictionary<string, ItemSO>();
-        foreach (var item in allItems)
-            itemLookup[item.id] = item;
+        if (inventoryData == null || inventoryData.Count == 0) return;
 
         foreach (var data in inventoryData)
         {
-            if (itemLookup.TryGetValue(data.itemId, out var item))
+            if (itemRegistry.TryGetValue(data.itemId, out var item))
                 Inventory.AddItem(item, data.count);
             else
                 Debug.LogWarning($"[StatusManager] 아이템 '{data.itemId}'를 찾을 수 없습니다.");
@@ -151,7 +159,7 @@ public class StatusManager : MonoBehaviour
     /// <summary>
     /// 활동 실행 가능 여부 확인
     /// </summary>
-    public bool CanExecuteActivity(ActivitySO activity)
+    public bool CanExecuteActivity(DataTable.ActivityTable activity)
     {
         if (!Condition.CanPerformActivity(activity))
             return false;
@@ -178,7 +186,7 @@ public class StatusManager : MonoBehaviour
         {
             foreach (var req in activity.itemConditions)
             {
-                if (!Inventory.HasItem(req.item, req.amount))
+                if (!Inventory.HasItem(GetItemById(req.itemId), req.amount))
                     return false;
             }
         }
@@ -188,7 +196,7 @@ public class StatusManager : MonoBehaviour
         {
             foreach (var req in activity.itemCost)
             {
-                if (!Inventory.HasItem(req.item, req.amount))
+                if (!Inventory.HasItem(GetItemById(req.itemId), req.amount))
                     return false;
             }
         }
@@ -199,7 +207,7 @@ public class StatusManager : MonoBehaviour
     /// <summary>
     /// 활동 실행 불가 사유 반환
     /// </summary>
-    public string GetActivityBlockReason(ActivitySO activity)
+    public string GetActivityBlockReason(DataTable.ActivityTable activity)
     {
         if (!Condition.CanPerformActivity(activity))
             return "현재 상태로는 이 활동을 할 수 없습니다.";
@@ -223,8 +231,9 @@ public class StatusManager : MonoBehaviour
         {
             foreach (var req in activity.itemConditions)
             {
-                if (!Inventory.HasItem(req.item, req.amount))
-                    return $"아이템 '{req.item?.itemName}'이(가) 부족합니다. (필요: {req.amount})";
+                var item = GetItemById(req.itemId);
+                if (!Inventory.HasItem(item, req.amount))
+                    return $"아이템 '{item?.itemName}'이(가) 부족합니다. (필요: {req.amount})";
             }
         }
 
@@ -232,8 +241,9 @@ public class StatusManager : MonoBehaviour
         {
             foreach (var req in activity.itemCost)
             {
-                if (!Inventory.HasItem(req.item, req.amount))
-                    return $"아이템 '{req.item?.itemName}'이(가) 부족합니다. (필요: {req.amount})";
+                var item = GetItemById(req.itemId);
+                if (!Inventory.HasItem(item, req.amount))
+                    return $"아이템 '{item?.itemName}'이(가) 부족합니다. (필요: {req.amount})";
             }
         }
 

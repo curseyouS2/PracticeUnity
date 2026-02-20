@@ -7,12 +7,12 @@ using System;
 /// </summary>
 public class LocationButton : MonoBehaviour
 {
-    public static event Action<LocationSO> OnLocationClicked;
-    public static event Action<ActivitySO> OnActivityClicked;
+    public static event Action<DataTable.LocationTable> OnLocationClicked;
+    public static event Action<DataTable.ActivityTable> OnActivityClicked;
     public static event Action<CharacterSO> OnCharacterClicked;
 
-    private LocationSO location;
-    private ActivitySO activity;
+    private DataTable.LocationTable location;
+    private DataTable.ActivityTable activity;
     private CharacterSO character;
 
     private Button button;
@@ -28,14 +28,14 @@ public class LocationButton : MonoBehaviour
         button?.onClick.RemoveListener(HandleClick);
     }
 
-    public void SetupAsLocation(LocationSO loc)
+    public void SetupAsLocation(DataTable.LocationTable loc)
     {
         location = loc;
         activity = null;
         character = null;
     }
 
-    public void SetupAsActivity(ActivitySO act)
+    public void SetupAsActivity(DataTable.ActivityTable act)
     {
         location = null;
         activity = act;

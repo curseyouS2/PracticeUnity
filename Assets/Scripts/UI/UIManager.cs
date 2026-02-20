@@ -55,7 +55,7 @@ public class UIManager : MonoBehaviour
         characterPanel?.UpdatePanel();
     }
 
-    public void DisplayLocations(List<LocationSO> locations)
+    public void DisplayLocations(List<DataTable.LocationTable> locations)
     {
         mainPanel?.DisplayLocations(locations);
     }
@@ -75,7 +75,7 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    public void ShowActivityResult(ActivitySO activity, float efficiency)
+    public void ShowActivityResult(DataTable.ActivityTable activity, float efficiency)
     {
         mainPanel?.ShowActivityResult(activity, efficiency);
     }
@@ -95,7 +95,7 @@ public class UIManager : MonoBehaviour
         endingPanel?.Show(ending);
     }
 
-    private void HandleActivitySelected(LocationSO location, ActivitySO activity)
+    private void HandleActivitySelected(DataTable.LocationTable location, DataTable.ActivityTable activity)
     {
         GameManager.Instance?.ExecuteActivity(location, activity);
     }

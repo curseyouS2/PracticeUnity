@@ -10,7 +10,7 @@ using System.Collections.Generic;
 /// </summary>
 public class MainPanel : MonoBehaviour
 {
-    public event Action<LocationSO, ActivitySO> OnActivitySelected;
+    public event Action<DataTable.LocationTable, DataTable.ActivityTable> OnActivitySelected;
     public event Action<CharacterSO> OnCharacterTalkSelected;
 
     [Header("Button Container")]
@@ -27,9 +27,9 @@ public class MainPanel : MonoBehaviour
     [Header("Colors")]
     [SerializeField] private Color unavailableColor = Color.gray;
 
-    private LocationSO currentLocation;
+    private DataTable.LocationTable currentLocation;
     private bool isInMoveMode;
-    private Stack<LocationSO> locationHistory = new Stack<LocationSO>();
+    private Stack<DataTable.LocationTable> locationHistory = new Stack<DataTable.LocationTable>();
 
     private void OnEnable()
     {
@@ -52,26 +52,24 @@ public class MainPanel : MonoBehaviour
 
     #region Event Handlers
 
-    private void HandleLocationClicked(LocationSO location)
+    private void HandleLocationClicked(DataTable.LocationTable location)
     {
-        // 이동 히스토리에 현재 장소 저장
         if (currentLocation != null)
             locationHistory.Push(currentLocation);
 
         LocationManager.Instance?.SetLocation(location);
         isInMoveMode = false;
 
-        // entryScript 출력
-        if (location.entryScript != null && location.entryScript.Length > 0)
+        if (location.entryScript != null && location.entryScript.Count > 0)
         {
-            string script = location.entryScript[UnityEngine.Random.Range(0, location.entryScript.Length)];
+            string script = location.entryScript[UnityEngine.Random.Range(0, location.entryScript.Count)];
             ShowMessage(script);
         }
 
         DisplayCurrentLocation();
     }
 
-    private void HandleActivityClicked(ActivitySO activity)
+    private void HandleActivityClicked(DataTable.ActivityTable activity)
     {
         OnActivitySelected?.Invoke(currentLocation, activity);
     }
@@ -116,11 +114,15 @@ public class MainPanel : MonoBehaviour
         isInMoveMode = false;
         ClearContainer();
 
-        // 1. 활동
-        if (currentLocation.activities != null)
+        // 1. 활동 (activities는 ID 목록 → Dictionary 조회)
+        if (currentLocation.activities != null && currentLocation.activities.Count > 0)
         {
-            foreach (var activity in currentLocation.activities)
-                CreateActivityButton(activity);
+            var actDict = DataTable.ActivityTable.GetDictionary();
+            foreach (var actId in currentLocation.activities)
+            {
+                if (actDict.TryGetValue(actId, out var activity))
+                    CreateActivityButton(activity);
+            }
         }
 
         // 2. 캐릭터
@@ -139,7 +141,7 @@ public class MainPanel : MonoBehaviour
     }
 
     /// <summary>
-    /// 이동 모드 화면 - connectedLocations 버튼 + 뒤로 버튼
+    /// 이동 모드 화면 - connectedLocations(ID 목록) 버튼 + 뒤로 버튼
     /// </summary>
     private void ShowMoveScreen()
     {
@@ -148,21 +150,22 @@ public class MainPanel : MonoBehaviour
         if (currentLocation?.connectedLocations != null)
         {
             int currentTime = RoutineManager.Instance != null ? RoutineManager.Instance.CurrentTimeMinutes : 0;
-            foreach (var loc in currentLocation.connectedLocations)
+            var locDict = DataTable.LocationTable.GetDictionary();
+            foreach (var locId in currentLocation.connectedLocations)
             {
-                if (loc != currentLocation && loc.IsAvailableAt(currentTime))
+                if (locId == currentLocation.id) continue;
+                if (locDict.TryGetValue(locId, out var loc) && LocationManager.IsAvailableAt(loc, currentTime))
                     CreateLocationButton(loc);
             }
         }
 
-        // 뒤로 버튼
         CreateBackButton();
     }
 
     /// <summary>
     /// 모든 이용 가능한 장소 표시 (게임 시작 시 사용)
     /// </summary>
-    public void DisplayLocations(List<LocationSO> locations)
+    public void DisplayLocations(List<DataTable.LocationTable> locations)
     {
         ClearContainer();
         currentLocation = null;
@@ -177,7 +180,7 @@ public class MainPanel : MonoBehaviour
 
     #region Button Creation
 
-    private void CreateLocationButton(LocationSO location)
+    private void CreateLocationButton(DataTable.LocationTable location)
     {
         GameObject btnObj = Instantiate(buttonPrefab, buttonContainer);
         LocationButton locBtn = btnObj.GetComponent<LocationButton>();
@@ -193,7 +196,7 @@ public class MainPanel : MonoBehaviour
         AddTooltipEvents(btnObj, () => GetLocationTooltip(location));
     }
 
-    private void CreateActivityButton(ActivitySO activity)
+    private void CreateActivityButton(DataTable.ActivityTable activity)
     {
         GameObject btnObj = Instantiate(buttonPrefab, buttonContainer);
         LocationButton locBtn = btnObj.GetComponent<LocationButton>();
@@ -282,14 +285,14 @@ public class MainPanel : MonoBehaviour
 
     #region Messages
 
-    public void ShowActivityResult(ActivitySO activity, float efficiency)
+    public void ShowActivityResult(DataTable.ActivityTable activity, float efficiency)
     {
         string result = $"<b>[{activity.activityName}]</b> 완료!\n";
 
-        // activityScript 랜덤 출력
-        if (activity.activityScript != null && activity.activityScript.Length > 0)
+        // activityScript 랜덤 출력 (List<string>)
+        if (activity.activityScript != null && activity.activityScript.Count > 0)
         {
-            string script = activity.activityScript[UnityEngine.Random.Range(0, activity.activityScript.Length)];
+            string script = activity.activityScript[UnityEngine.Random.Range(0, activity.activityScript.Count)];
             result += script + "\n";
         }
         else if (!string.IsNullOrEmpty(activity.description))
@@ -300,12 +303,10 @@ public class MainPanel : MonoBehaviour
         if (efficiency < 1.0f)
             result += $"<color=yellow>(효율 {efficiency * 100:F0}%)</color>\n";
 
-        // 비용 표시
         string costText = GetStatChangeText(activity.statCost);
         if (!string.IsNullOrEmpty(costText))
             result += $"<color=#ff8888>소비: {costText}</color>\n";
 
-        // 보상 표시
         string rewardText = GetStatChangeText(activity.statReward);
         if (!string.IsNullOrEmpty(rewardText))
             result += $"<color=#88ff88>획득: {rewardText}</color>\n";
@@ -345,14 +346,14 @@ public class MainPanel : MonoBehaviour
         DisplayCurrentLocation();
     }
 
-    public void SelectLocation(LocationSO location)
+    public void SelectLocation(DataTable.LocationTable location)
     {
         if (location == null) return;
         currentLocation = location;
         DisplayCurrentLocation();
     }
 
-    public LocationSO CurrentLocation => currentLocation;
+    public DataTable.LocationTable CurrentLocation => currentLocation;
 
     private void ClearContainer()
     {
@@ -361,7 +362,7 @@ public class MainPanel : MonoBehaviour
             Destroy(child.gameObject);
     }
 
-    private string BuildActivityLabel(ActivitySO activity, bool canExecute)
+    private string BuildActivityLabel(DataTable.ActivityTable activity, bool canExecute)
     {
         string label = $"<b>{activity.activityName}</b>";
 
@@ -407,17 +408,17 @@ public class MainPanel : MonoBehaviour
         return string.Join(" ", parts);
     }
 
-    private string GetLocationTooltip(LocationSO location)
+    private string GetLocationTooltip(DataTable.LocationTable location)
     {
         if (location == null) return "";
         string tooltip = $"<b>{location.locationName}</b>\n";
         if (!string.IsNullOrEmpty(location.description))
             tooltip += $"{location.description}\n";
-        tooltip += $"<color=#888888>영업시간: {location.GetAvailableTimeText()}</color>";
+        tooltip += $"<color=#888888>영업시간: {LocationManager.GetAvailableTimeText(location)}</color>";
         return tooltip;
     }
 
-    private string GetActivityTooltip(ActivitySO activity, bool canExecute)
+    private string GetActivityTooltip(DataTable.ActivityTable activity, bool canExecute)
     {
         if (activity == null) return "";
 
@@ -428,12 +429,10 @@ public class MainPanel : MonoBehaviour
 
         tooltip += $"<color=#888888>소요 시간: {FormatDuration(activity.durationMinutes)}</color>\n";
 
-        // 비용 표시
         string costText = GetStatChangeText(activity.statCost);
         if (!string.IsNullOrEmpty(costText))
             tooltip += $"<color=#ff8888>소비: {costText}</color>\n";
 
-        // 보상 표시
         string rewardText = GetStatChangeText(activity.statReward);
         if (!string.IsNullOrEmpty(rewardText))
             tooltip += $"<color=#88ff88>획득: {rewardText}</color>\n";

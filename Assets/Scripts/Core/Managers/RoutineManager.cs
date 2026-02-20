@@ -114,7 +114,7 @@ public class RoutineManager : MonoBehaviour
     public string GetRemainingTimeText() => TimeUtility.FormatRemainingTime(Time.GetRemainingMinutes());
     public string GetTimePeriodName() => TimeUtility.GetTimePeriodName(Time.CurrentTimeMinutes);
     public string GetDayOfWeekName() => TimeUtility.GetDayOfWeekName(Time.CurrentDayOfWeek);
-    public string GetEndTimeText(ActivitySO activity) => TimeUtility.MinutesToTimeString(Time.CurrentTimeMinutes + activity.durationMinutes);
+    public string GetEndTimeText(DataTable.ActivityTable activity) => TimeUtility.MinutesToTimeString(Time.CurrentTimeMinutes + activity.durationMinutes);
     public bool IsWeekend() => Time.IsWeekend();
 
     #endregion

@@ -20,6 +20,7 @@ public class ItemSO : ScriptableObject
     public StatChanges useEffect;
 }
 
+[GoogleSheet.Core.Type.UGS(typeof(ItemType))]
 public enum ItemType
 {
     Consumable,     // 소비 아이템

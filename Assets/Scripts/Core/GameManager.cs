@@ -32,7 +32,10 @@ public class GameManager : MonoBehaviour
         else
         {
             Destroy(gameObject);
+            return;
         }
+
+        UnityGoogleSheet.LoadAllData();
     }
 
     private void Start()
@@ -168,7 +171,7 @@ public class GameManager : MonoBehaviour
         uiManager?.ShowMessage($"Day {newDay} 아침입니다!");
     }
 
-    private void OnActivityExecuted(ActivitySO activity, float efficiency)
+    private void OnActivityExecuted(DataTable.ActivityTable activity, float efficiency)
     {
         uiManager?.ShowActivityResult(activity, efficiency);
     }
@@ -184,7 +187,7 @@ public class GameManager : MonoBehaviour
     /// <summary>
     /// 활동 실행 (UIManager에서 호출)
     /// </summary>
-    public void ExecuteActivity(LocationSO location, ActivitySO activity)
+    public void ExecuteActivity(DataTable.LocationTable location, DataTable.ActivityTable activity)
     {
         if (ActivityService == null) return;
 
