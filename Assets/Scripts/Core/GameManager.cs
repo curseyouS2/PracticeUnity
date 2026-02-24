@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
-
+using UGS;
 /// <summary>
 /// 게임 전체 흐름 관리 (초기화, 엔딩)
 /// ActivityService를 통해 활동 실행, 각 매니저에 세부 로직 위임

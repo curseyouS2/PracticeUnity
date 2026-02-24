@@ -32,15 +32,15 @@ public class LocationManager : MonoBehaviour
         locations = DataTable.LocationTable.GetList();
         Debug.Log($"[LocationManager] DataTable에서 {locations.Count}개의 장소 로드");
 
-        if (!string.IsNullOrEmpty(startLocationId))
+        if (!string.IsNullOrEmpty(startLocationId) && SetLocation(startLocationId))
         {
-            SetLocation(startLocationId);
+            // startLocationId로 위치 설정 성공
         }
-        else if (nowLocation == null)
+        else
         {
             nowLocation = locations.Find(loc => loc.id == "loc_home") ?? locations.FirstOrDefault();
             if (nowLocation != null)
-                Debug.Log($"[LocationManager] 기본 위치 설정: {nowLocation.locationName}");
+                Debug.Log($"[LocationManager] 기본 위치로 설정: {nowLocation.locationName}");
         }
     }
 

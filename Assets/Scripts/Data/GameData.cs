@@ -8,7 +8,7 @@ public class GameState
     public int currentDay = 1;
     public int currentTime = 360;
     public int maxDays = 30;
-    public string currentLocationId = "home";
+    public string currentLocationId = "loc_home";
     public Stats stats = new Stats();
     public Health health = new Health();
     public ConditionType condition = ConditionType.None;
