@@ -16,7 +16,7 @@ namespace GoogleSheet.Type
             if (string.IsNullOrEmpty(value) || value == "()")
                 return result;
 
-            var entries = ReadUtil.GetBracketValueToArray(value);
+            var entries = ReadUtil.GetParenthesisValueToArray(value);
             if (entries == null) return result;
 
             foreach (var entry in entries)

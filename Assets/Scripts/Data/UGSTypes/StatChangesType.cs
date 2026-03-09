@@ -17,8 +17,9 @@ namespace GoogleSheet.Type
             if (string.IsNullOrEmpty(value) || value == "()")
                 return result;
 
-            var entries = ReadUtil.GetBracketValueToArray(value);
-            if (entries == null) return result;
+            var entries = ReadUtil.GetParenthesisValueToArray(value);
+            if (entries == null)
+                entries = value.Split(','); // 괄호 없이 key:value 형태인 경우
 
             foreach (var entry in entries)
             {

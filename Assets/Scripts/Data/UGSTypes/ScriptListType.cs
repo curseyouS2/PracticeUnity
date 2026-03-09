@@ -17,15 +17,17 @@ namespace GoogleSheet.Type
             if (string.IsNullOrEmpty(value) || value == "[]")
                 return result;
 
+            string inner = value;
             if (value[0] == '[' && value[value.Length - 1] == ']')
+                inner = value.Substring(1, value.Length - 2);
+
+            // 파이프(|)가 있으면 스크립트 리스트, 없으면 쉼표(,)로 분리
+            char separator = inner.Contains('|') ? '|' : ',';
+            var parts = inner.Split(separator);
+            foreach (var part in parts)
             {
-                value = value.Substring(1, value.Length - 2);
-                var parts = value.Split('|');
-                foreach (var part in parts)
-                {
-                    if (!string.IsNullOrEmpty(part))
-                        result.Add(part);
-                }
+                if (!string.IsNullOrEmpty(part))
+                    result.Add(part);
             }
             return result;
         }

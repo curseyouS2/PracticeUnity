@@ -134,6 +134,10 @@ public class GameManager : MonoBehaviour
         if (statusManager != null)
             statusManager.OnStatusUpdated += () => refreshScheduler.RequestRefresh();
 
+        // LocationManager 이벤트
+        if (locationManager != null)
+            locationManager.OnLocationChanged += _ => refreshScheduler.RequestRefresh();
+
         // RoutineManager 이벤트
         if (routineManager != null)
         {

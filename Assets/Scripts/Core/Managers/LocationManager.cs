@@ -1,4 +1,5 @@
 using UnityEngine;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -8,6 +9,8 @@ using System.Linq;
 public class LocationManager : MonoBehaviour
 {
     public static LocationManager Instance { get; private set; }
+
+    public event Action<DataTable.LocationTable> OnLocationChanged;
 
     private DataTable.LocationTable nowLocation;
     private List<DataTable.LocationTable> locations;
@@ -69,6 +72,7 @@ public class LocationManager : MonoBehaviour
         if (dict.TryGetValue(locationId, out var location))
         {
             nowLocation = location;
+            OnLocationChanged?.Invoke(nowLocation);
             Debug.Log($"[LocationManager] 현재 위치 설정: {nowLocation.locationName} ({locationId})");
             return true;
         }
@@ -87,6 +91,7 @@ public class LocationManager : MonoBehaviour
         if (location != null)
         {
             nowLocation = location;
+            OnLocationChanged?.Invoke(nowLocation);
             Debug.Log($"[LocationManager] 현재 위치 설정: {nowLocation.locationName}");
         }
     }
@@ -168,6 +173,8 @@ public class LocationManager : MonoBehaviour
 
     public static bool IsAvailableAt(DataTable.LocationTable loc, int currentTimeMinutes)
     {
+        if (loc.openTimeMinutes == 0 && loc.closeTimeMinutes == 0)
+            return true; // 시간 제한 없음 (항상 개방)
         if (loc.closeTimeMinutes < loc.openTimeMinutes)
             return currentTimeMinutes >= loc.openTimeMinutes || currentTimeMinutes < loc.closeTimeMinutes;
         return currentTimeMinutes >= loc.openTimeMinutes && currentTimeMinutes < loc.closeTimeMinutes;
